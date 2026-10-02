@@ -1,3 +1,4 @@
 # Repository files not needed in the extension package
+.github/**
 .gitignore
 SECURITY.md

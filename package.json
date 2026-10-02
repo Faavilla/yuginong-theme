@@ -2,7 +2,7 @@
   "name": "yuginong-theme",
   "displayName": "Yuginong Light",
   "description": "직접 만든 라이트 테마. 요소별 색상 구분 확실하게.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "yuginong-themes",
   "engines": {
     "vscode": "^1.140.0"
