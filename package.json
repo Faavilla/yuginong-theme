@@ -1,0 +1,26 @@
+{
+  "name": "yuginong-theme",
+  "displayName": "Yuginong Light",
+  "description": "직접 만든 라이트 테마. 요소별 색상 구분 확실하게.",
+  "version": "0.0.1",
+  "publisher": "yuginong-themes",
+  "engines": {
+    "vscode": "^1.140.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Faavilla/yuginong-theme.git"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "label": "Yuginong Light",
+        "uiTheme": "vs",
+        "path": "./themes/yuginong-light-color-theme.json"
+      }
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+# Packages the theme into a .vsix and attaches it to a GitHub release on every v* tag push
+name: vsix package and release
+
+permissions:
+  contents: write # Needed to create the release and upload the .vsix
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+env:
+  # Pinned so a new vsce release can't change the build; vsce 4 needs Node 22+, which ubuntu-latest ships
+  VSCE_VERSION: 4.0.0
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # The default is 360; a stuck npx download shouldn't hold the runner that long
+
+    steps:
+      # Pinned to a commit SHA: tags can be moved to point at other commits
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # The release step authenticates on its own
+
+      # A mismatched tag would publish a release whose .vsix carries a different version
+      - name: Check tag matches package.json version
+        run: |
+          PACKAGE_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "${PACKAGE_VERSION}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${PACKAGE_VERSION}"
+            exit 1
+          fi
+
+      # vsce names the file <name>-<version>.vsix from package.json
+      - name: Package .vsix
+        run: |
+          echo "Node : $(node --version)"
+          npx -y "@vscode/vsce@${VSCE_VERSION}" package
+
+      # --verify-tag stops gh from creating the tag on the default branch if it is missing
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${GITHUB_REF_NAME}" ./*.vsix --verify-tag --title "${GITHUB_REF_NAME}" --generate-notes
