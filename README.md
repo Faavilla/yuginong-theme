@@ -18,7 +18,7 @@ VS Code용 **라이트 테마**입니다. 요소별 색상 구분을 확실하�
 code --install-extension yuginong-theme-<버전>.vsix
 ```
 
-VS Code 1.140.0 이상이 필요합니다.
+VS Code 1.90.0 이상이 필요합니다.
 
 ## 업데이트
 

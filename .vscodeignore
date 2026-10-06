@@ -2,3 +2,7 @@
 .github/**
 .gitignore
 SECURITY.md
+
+# Local-only folders (gitignored, but vsce packages from the working tree)
+.vscode/**
+.claude/**

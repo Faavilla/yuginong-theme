@@ -33,11 +33,34 @@ jobs:
             exit 1
           fi
 
+      # vsce does not read the theme file; a broken JSON would still package fine and only fail inside VS Code
+      - name: Validate theme JSON
+        run: |
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            for (const t of pkg.contributes.themes) {
+              if (!fs.existsSync(t.path)) throw new Error(`theme file missing: ${t.path}`);
+              const theme = JSON.parse(fs.readFileSync(t.path, "utf8"));
+              if (!theme.colors || !theme.tokenColors) throw new Error(`${t.path}: colors/tokenColors missing`);
+              console.log(`${t.path}: ${Object.keys(theme.colors).length} colors, ${theme.tokenColors.length} token rules`);
+            }
+          '
+
       # vsce names the file <name>-<version>.vsix from package.json
       - name: Package .vsix
         run: |
           echo "Node : $(node --version)"
           npx -y "@vscode/vsce@${VSCE_VERSION}" package
+
+      # VS Code only loads package.json and what it points to, so those must be byte-for-byte the source.
+      # Catches packaging mistakes; it runs in the same job as vsce, so it is no defense against a malicious dependency
+      - name: Verify .vsix payload matches source
+        run: |
+          unzip -q ./*.vsix -d "${RUNNER_TEMP}/vsix"
+          cmp package.json "${RUNNER_TEMP}/vsix/extension/package.json"
+          diff -r themes "${RUNNER_TEMP}/vsix/extension/themes"
+          unzip -l ./*.vsix
 
       # --verify-tag stops gh from creating the tag on the default branch if it is missing
       - name: Create GitHub release
